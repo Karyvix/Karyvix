@@ -1,5 +1,6 @@
 import pymupdf
 
+
 def extract_text_from_pdf(file_path: str) -> str:
     """
     Extracts text from a PDF resume.
@@ -10,14 +11,20 @@ def extract_text_from_pdf(file_path: str) -> str:
     Returns:
         Extracted text from all pages.
     """
-
     document = pymupdf.open(file_path)
 
-    text = ""
+    try:
+        text = ""
 
-    for page in document:
-        text += page.get_text()
+        for page in document:
+            text += page.get_text()
 
-    document.close()
+        text = text.strip()
 
-    return text
+        if not text:
+            raise ValueError("No readable text found in PDF.")
+
+        return text
+
+    finally:
+        document.close()
