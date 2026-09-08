@@ -8,7 +8,7 @@ from app.routes.career_analysis import router as career_analysis_router
 # from app.routes.ai_analysis import router as ai_analysis_router
 
 app = FastAPI(
-    title="HirePilot AI",
+    title="Karyvix",
     description="AI-powered career assistant",
     version="0.2.0"
 ) #Creates the application with desc and title
@@ -32,7 +32,7 @@ app.include_router(career_analysis_router)
 @app.get("/") #creates a get endpoint at "/"
 def home(): #function runs when someone visits /
     return {
-        "message": "Welcome to HirePilot AI",
+        "message": "Welcome to Karyvix",
         "status": "running"
     } #Fast api auto converts python dicts to json 
 

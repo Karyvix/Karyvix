@@ -103,7 +103,7 @@ function App() {
 
       setError(
         error.message ||
-        "Unable to connect to HirePilot AI."
+        "Unable to connect to Karyvix."
       );
 
     } finally {
@@ -125,7 +125,7 @@ function App() {
             <Sparkles size={18} />
           </div>
 
-          <span>HirePilot</span>
+          <span>Karyvix</span>
 
         </div>
 
@@ -156,7 +156,7 @@ function App() {
 
           <p className="hero-description">
             Upload your resume and paste a job description.
-            HirePilot analyzes your fit, identifies skill gaps,
+            Karyvix analyzes your fit, identifies skill gaps,
             and gives you actionable recommendations.
           </p>
 
