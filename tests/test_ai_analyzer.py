@@ -1,69 +1,42 @@
+from unittest.mock import patch
+
+from app.models.ai_analysis import AIAnalysis
 from app.services.ai_analyzer import analyze_resume
 
 
-resume = """
-Rishab Singh
+def test_analyze_resume():
+    fake_result = AIAnalysis(
+        match_score=75,
+        matched_skills=["Python", "FastAPI", "TensorFlow"],
+        missing_skills=["SQL", "Docker", "AWS"],
+        strengths=["Strong Python and AI/ML project experience."],
+        weaknesses=["Limited cloud and containerization experience."],
+        recommendations=["Learn Docker and AWS."],
+    )
 
-Education:
-B.Tech Computer Science and Engineering
+    fake_response = type(
+        "FakeResponse",
+        (),
+        {
+            "parsed": fake_result,
+            "text": "",
+        },
+    )()
 
-Skills:
-Python
-C++
-TensorFlow
-OpenCV
-FastAPI
+    with patch("app.services.ai_analyzer.genai.Client") as mock_client:
+        mock_client.return_value.models.generate_content.return_value = (
+            fake_response
+        )
 
-Projects:
-Built a face recognition system using Python, OpenCV and TensorFlow.
-Developed a plant disease detection system using deep learning.
-"""
+        result = analyze_resume(
+            "Python FastAPI TensorFlow resume",
+            "Python FastAPI SQL Docker AWS job",
+        )
 
-
-job_description = """
-AI/ML Software Engineering Intern
-
-We are looking for a candidate with experience in Python,
-machine learning, REST APIs and FastAPI.
-
-Required:
-Python
-Machine Learning
-FastAPI
-SQL
-Docker
-
-Preferred:
-AWS
-TensorFlow
-Computer Vision
-"""
-
-
-result = analyze_resume(
-    resume,
-    job_description
-)
-
-
-print("Match Score:", result.match_score)
-
-print("\nMatched Skills:")
-for skill in result.matched_skills:
-    print("-", skill)
-
-print("\nMissing Skills:")
-for skill in result.missing_skills:
-    print("-", skill)
-
-print("\nStrengths:")
-for strength in result.strengths:
-    print("-", strength)
-
-print("\nWeaknesses:")
-for weakness in result.weaknesses:
-    print("-", weakness)
-
-print("\nRecommendations:")
-for recommendation in result.recommendations:
-    print("-", recommendation)
+    assert isinstance(result, AIAnalysis)
+    assert result.match_score == 75
+    assert "Python" in result.matched_skills
+    assert "FastAPI" in result.matched_skills
+    assert "SQL" in result.missing_skills
+    assert "Docker" in result.missing_skills
+    assert "AWS" in result.missing_skills

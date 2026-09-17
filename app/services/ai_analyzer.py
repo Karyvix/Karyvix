@@ -2,60 +2,63 @@ import os
 
 from dotenv import load_dotenv
 from google import genai
-from google.genai import types
 
 from app.models.ai_analysis import AIAnalysis
 
-
 load_dotenv()
 
-api_key = os.getenv("GEMINI_API_KEY")
 
-if not api_key:
-    raise ValueError("GEMINI_API_KEY not found in environment.")
+def analyze_resume(resume_text: str, job_description: str) -> AIAnalysis:
+    api_key = os.getenv("GEMINI_API_KEY")
 
-client = genai.Client(api_key=api_key)
+    if not api_key:
+        raise RuntimeError("GEMINI_API_KEY is not configured.")
 
-
-def analyze_resume(
-    resume_text: str,
-    job_description: str
-) -> AIAnalysis:
+    client = genai.Client(api_key=api_key)
 
     prompt = f"""
-You are an expert technical recruiter and resume evaluator.
-
-Analyze the candidate's resume against the provided job description.
-
-Your analysis must be based only on the information present in the
-resume and job description. Do not invent experience, skills, education,
-or achievements.
-
-Evaluate:
-- Overall suitability for the role
-- Skills demonstrated by the candidate
-- Important skills required by the job that are missing or unclear
-- Candidate strengths
-- Candidate weaknesses
-- Specific recommendations for improving the candidate's fit
+Analyze the following resume against the provided job description.
 
 RESUME:
 {resume_text}
 
 JOB DESCRIPTION:
 {job_description}
+
+Evaluate the candidate objectively.
+
+Return:
+- match_score: overall resume-to-job match from 0 to 100
+- matched_skills: skills present in both the resume and job requirements
+- missing_skills: important job requirements missing from the resume
+- strengths: strongest aspects of the candidate for this role
+- weaknesses: areas where the candidate is weaker for this role
+- recommendations: specific actions the candidate should take to improve their fit
 """
 
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt,
-        config=types.GenerateContentConfig(
-            response_mime_type="application/json",
-            response_schema=AIAnalysis,
-        ),
-    )
+    try:
+        response = client.models.generate_content(
+            model="gemini-3.6-flash",
+            contents=prompt,
+            config={
+                "response_mime_type": "application/json",
+                "response_schema": AIAnalysis,
+            },
+        )
+    except Exception as exc:
+        raise RuntimeError(
+            "Unable to analyze the resume with the AI service."
+        ) from exc
 
-    if response.parsed:
+    if response.parsed is not None:
         return response.parsed
 
-    return AIAnalysis.model_validate_json(response.text)
+    if response.text:
+        try:
+            return AIAnalysis.model_validate_json(response.text)
+        except Exception as exc:
+            raise RuntimeError(
+                "The AI service returned an invalid analysis response."
+            ) from exc
+
+    raise RuntimeError("The AI service returned an empty response.")

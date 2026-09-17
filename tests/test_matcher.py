@@ -1,46 +1,48 @@
 from app.services.matcher import calculate_match_score
 
 
-resume = """
-Rishab Singh
+def test_match_score():
+    resume = """
+    Rishab Singh
 
-Skills:
-Python
-C++
-TensorFlow
-OpenCV
-FastAPI
-"""
+    Skills:
 
+    Python
+    C++
+    TensorFlow
+    OpenCV
+    FastAPI
+    """
 
-job_description = """
-Python Developer
+    job_description = """
+    Python Developer
 
-Required Skills:
-Python
-FastAPI
-SQL
-Docker
-AWS
-"""
+    Required Skills:
 
+    Python
+    FastAPI
+    SQL
+    Docker
+    AWS
+    """
 
-skills = [
-    "Python",
-    "FastAPI",
-    "SQL",
-    "Docker",
-    "AWS"
-]
+    skills = [
+        "Python",
+        "FastAPI",
+        "SQL",
+        "Docker",
+        "AWS",
+    ]
 
+    result = calculate_match_score(
+        resume,
+        job_description,
+        skills,
+    )
 
-result = calculate_match_score(
-    resume,
-    job_description,
-    skills
-)
-
-
-print("Match Score:", result["score"])
-print("Matched Skills:", result["matched_skills"])
-print("Missing Skills:", result["missing_skills"])
+    assert result["score"] == 40.0
+    assert "Python" in result["matched_skills"]
+    assert "FastAPI" in result["matched_skills"]
+    assert "SQL" in result["missing_skills"]
+    assert "Docker" in result["missing_skills"]
+    assert "AWS" in result["missing_skills"]
